@@ -3,6 +3,15 @@
     "api/**/*.php": { "runtime": "vercel-php@0.7.4" }
   },
   "routes": [
+    { "src": "/api/authentication/login", "dest": "/api/login.php" },
+    { "src": "/api/authentication/register", "dest": "/api/register.php" },
+    { "src": "/api/authentication/logout", "dest": "/api/logout.php" },
+    { "src": "/api/users(?:/(\\d+))?", "dest": "/api/users.php?id=$1" },
+    { "src": "/api/categories(?:/(\\d+))?", "dest": "/api/categories.php?id=$1" },
+    { "src": "/api/skills(?:/(\\d+))?", "dest": "/api/skills.php?id=$1" },
+    { "src": "/api/classes(?:/(\\d+))?", "dest": "/api/classes.php?id=$1" },
+    { "src": "/api/class-users(?:/(\\d+))?", "dest": "/api/class_users.php?id=$1" },
+    { "src": "/api/class-attendances(?:/(\\d+))?", "dest": "/api/class_attendances.php?id=$1" },
     { "src": "/(.*)", "dest": "/api/$1" }
   ]
 }
