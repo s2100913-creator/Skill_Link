@@ -12,22 +12,24 @@ function fail($code, $msg) {
     exit;
 }
 
-$select = 'SELECT cu.id, cu.class_id, c.name AS class, cu.user_id, u.name AS member
+$select = 'SELECT cu.id, cu.class_id, c.name AS class, c.schedule, c.start_date, c.end_date,
+                  s.name AS skill, o.name AS owner,
+                  cu.user_id, u.name AS member
            FROM class_users cu
            JOIN classes c ON c.id = cu.class_id
+           JOIN user_skills s ON s.id = c.user_skill_id
+           JOIN users o ON o.id = s.user_id
            JOIN users u ON u.id = cu.user_id';
 
 if ($method === 'GET' && $id === 0) {
-    // optional filter: class_users.php?class_id=1
-    $class_id = (int)($_GET['class_id'] ?? 0);
-    if ($class_id) {
-        $stmt = $pdo->prepare($select . ' WHERE cu.class_id = :c ORDER BY cu.id');
-        $stmt->execute([':c' => $class_id]);
-        $rows = $stmt->fetchAll();
-    } else {
-        $rows = $pdo->query($select . ' ORDER BY cu.id')->fetchAll();
-    }
-    echo json_encode(['success' => true, 'class_users' => $rows]);
+    // optional filters: ?class_id=1 and/or ?user_id=2
+    $where = []; $params = [];
+    if (!empty($_GET['class_id'])) { $where[] = 'cu.class_id = :c'; $params[':c'] = (int)$_GET['class_id']; }
+    if (!empty($_GET['user_id']))  { $where[] = 'cu.user_id = :u';  $params[':u'] = (int)$_GET['user_id']; }
+    $sql = $select . ($where ? ' WHERE ' . implode(' AND ', $where) : '') . ' ORDER BY cu.id';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+    echo json_encode(['success' => true, 'class_users' => $stmt->fetchAll()]);
 
 } elseif ($method === 'GET') {
     $stmt = $pdo->prepare($select . ' WHERE cu.id = :id');
